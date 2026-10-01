@@ -11,7 +11,7 @@ function timestamp(value: unknown): string | undefined {
   if (value && typeof value === "object" && "toDate" in value && typeof value.toDate === "function") return value.toDate().toISOString();
 }
 export function publicVideo(id: string, data: Record<string, unknown>): Video | null {
-  const { updatedAt: _updated, ...fields } = data;
+  const fields = Object.fromEntries(Object.entries(data).filter(([key]) => key !== "updatedAt"));
   const parsed = videoSchema.safeParse({ ...fields, id, publishedAt: timestamp(data.publishedAt) });
   if (!parsed.success || !canUseImage(parsed.data.thumbnail)) return null;
   return parsed.data;

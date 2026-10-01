@@ -14,7 +14,7 @@ export async function fetchAllBloggerPosts(): Promise<BloggerPost[]> {
     const response = await fetch(url, { cache: "no-store", signal: timeout });
     if (!response.ok) throw new Error(`Blogger fetch failed (${response.status}); no posts were changed.`);
     const result = await response.json();
-    if (!result || typeof result !== "object" || (result.items !== undefined && !Array.isArray(result.items))) throw new Error("Invalid Blogger response; synchronization aborted.");
+    if (!result || result.kind !== "blogger#postList" || (result.items !== undefined && !Array.isArray(result.items))) throw new Error("Invalid Blogger response; synchronization aborted.");
     posts.push(...(result.items || []));
     nextPageToken = result.nextPageToken;
     if (!nextPageToken) return posts;

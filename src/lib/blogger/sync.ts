@@ -19,6 +19,17 @@ export async function syncBlogger() {
     const normalized = (await fetchAllBloggerPosts()).map(normalizePost);
     const existing = await db.collection("blogPosts").where("sourceBlogId", "==", process.env.BLOGGER_BLOG_ID).get();
     const byId = new Map(existing.docs.map(d => [d.id, d.data()]));
+    // Adopt older records without losing the editor's visibility and ordering.
+    // Never overwrite a document explicitly belonging to another blog.
+    const unscoped = normalized.filter(p => !byId.has(p.bloggerPostId));
+    for (let offset = 0; offset < unscoped.length; offset += 400) {
+      const records = await db.getAll(...unscoped.slice(offset, offset + 400).map(p => db.collection("blogPosts").doc(p.bloggerPostId)));
+      for (const record of records) {
+        const previous = record.data();
+        if (previous?.sourceBlogId && previous.sourceBlogId !== process.env.BLOGGER_BLOG_ID) throw new HttpError(409, "A post ID belongs to a different configured blog.");
+        if (previous) byId.set(record.id, previous);
+      }
+    }
     const ids = new Set(normalized.map(p => p.bloggerPostId));
     const now = Timestamp.now();
     // Upserts must all succeed before any removals are marked. An interrupted
