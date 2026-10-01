@@ -1,0 +1,13 @@
+export type Video = {
+  id: string; title: string; description?: string; thumbnail: string;
+  provider: "youtube" | "vimeo" | "hosted"; videoUrl: string;
+  providerId?: string; duration?: string; featured: boolean; order: number;
+  active: boolean; heroSlide?: number; publishedAt?: string;
+};
+export type BlogPost = {
+  id: string; bloggerPostId: string; title: string; excerpt: string;
+  coverImage?: string; author?: string; bloggerUrl: string; publishedAt: string;
+  updatedAt?: string; labels: string[]; featured: boolean; order: number;
+  active: boolean; syncedAt?: string; sourceRemoved?: boolean;
+};
+export type SiteSettings = { contactFormUrl?: string; instagramUrl?: string; linkedinUrl?: string; youtubeUrl?: string; journalUrl?: string; journalAllPostsLabel?: string; journalReadMoreLabel?: string };
