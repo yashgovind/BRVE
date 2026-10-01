@@ -67,8 +67,8 @@ node --env-file=.env.local --import tsx scripts/seed-videos.ts
 Configure `siteSettings/general.contactFormUrl` in the admin UI. Its CTA remains
 disabled until a valid URL exists; the approved email link continues to work.
 Firebase Storage is intentionally not used. Metadata points to external providers
-or static `/media/` files. Rules and composite indexes are included but have NOT
-been deployed. Do not deploy them until the project is approved for live setup.
+or static `/media/` files. The current public queries use Firestore's automatic
+single-field indexes, so composite indexes are not required.
 
 ## Blogger API and synchronization
 

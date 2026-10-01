@@ -1,7 +1,4 @@
 {
-  "indexes": [
-    { "collectionGroup": "videos", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "active", "order": "ASCENDING" }, { "fieldPath": "order", "order": "ASCENDING" }] },
-    { "collectionGroup": "blogPosts", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "active", "order": "ASCENDING" }, { "fieldPath": "publishedAt", "order": "DESCENDING" }] }
-  ],
+  "indexes": [],
   "fieldOverrides": []
 }

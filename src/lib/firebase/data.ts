@@ -17,12 +17,15 @@ export function publicVideo(id: string, data: Record<string, unknown>): Video | 
   return parsed.data;
 }
 const readVideos = unstable_cache(async () => {
-  const snapshot = await adminDb().collection("videos").where("active", "==", true).orderBy("order").limit(24).get();
-  return snapshot.docs.map(doc => publicVideo(doc.id, doc.data())).filter((v): v is Video => Boolean(v));
+  // Keep this to a single-field query so a new project does not need a
+  // composite-index deployment before its approved content can render.
+  const snapshot = await adminDb().collection("videos").where("active", "==", true).limit(100).get();
+  return snapshot.docs.map(doc => publicVideo(doc.id, doc.data())).filter((v): v is Video => Boolean(v))
+    .sort((a, b) => a.order - b.order).slice(0, 24);
 }, ["brve-videos"], { revalidate: 300, tags: ["videos"] });
 
 const readPosts = unstable_cache(async () => {
-  const snapshot = await adminDb().collection("blogPosts").where("active", "==", true).orderBy("publishedAt", "desc").limit(8).get();
+  const snapshot = await adminDb().collection("blogPosts").where("active", "==", true).limit(200).get();
   return snapshot.docs.flatMap(doc => {
     const d = doc.data(); const publishedAt = timestamp(d.publishedAt);
     if (typeof d.title !== "string" || !publishedAt || !isPublicHttpsUrl(d.bloggerUrl) || d.sourceRemoved) return [];
