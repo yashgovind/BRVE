@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { browserSessionPersistence, getAuth, GoogleAuthProvider, onAuthStateChanged, setPersistence, signInWithPopup, signOut, type User } from "firebase/auth";
 import { getFirebaseClientApp } from "@/lib/firebase/client";
 import { Logo } from "@/components/ui/Logo";
+import Link from "next/link";
 import type { SiteSettings, Video } from "@/types/site";
 
 const emptyVideo: Video = { id: "", title: "", thumbnail: "", videoUrl: "", provider: "hosted", featured: true, order: 0, active: true, heroSlide: 0 };
@@ -43,7 +44,7 @@ export function AdminPanel({ backendReady }: { backendReady: boolean }) {
         setUser(current); setAuthReady(true); setAuthorized(false);
         if (current) { setStatus("Checking admin access…"); void load().then(() => setStatus("")).catch(e => setStatus(e.message)); }
       });
-    } catch { setStatus("Firebase web configuration is missing."); setAuthReady(true); }
+    } catch { queueMicrotask(() => { setStatus("Firebase web configuration is missing."); setAuthReady(true); }); }
   }, [load]);
 
   async function login() {
@@ -76,7 +77,7 @@ export function AdminPanel({ backendReady }: { backendReady: boolean }) {
     finally { setBusy(false); }
   }
 
-  return <main className="admin-shell"><header className="admin-header"><a href="/" aria-label="BRVE homepage"><Logo /></a><a href="/" className="eyebrow">← Website preview</a></header><div className="admin-intro"><span className="eyebrow">Private administration</span><h1>BRVE control room.</h1><p>Manage video links, site settings, and Blogger synchronization.</p></div>
+  return <main className="admin-shell"><header className="admin-header"><Link href="/" aria-label="BRVE homepage"><Logo /></Link><Link href="/" className="eyebrow">← Website preview</Link></header><div className="admin-intro"><span className="eyebrow">Private administration</span><h1>BRVE control room.</h1><p>Manage video links, site settings, and Blogger synchronization.</p></div>
     {!backendReady && <div className="admin-notice"><strong>Server connection pending.</strong><p>Google sign-in is configured. To verify admin access and save to Firestore, configure a Firebase service account on the server. No live edits are enabled until then.</p></div>}
     <div className="admin-auth">{user ? <><span>{user.email}</span><button className="admin-button secondary" onClick={() => void signOut(getAuth(getFirebaseClientApp()))}>Sign out</button></> : <button className="admin-button" disabled={!authReady || busy} onClick={login}>{authReady ? "Sign in with Google" : "Loading sign-in…"}</button>}</div>
     {status && <p role="status" className="admin-status">{status}</p>}

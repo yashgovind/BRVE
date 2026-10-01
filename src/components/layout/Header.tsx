@@ -26,19 +26,21 @@ export function Header({ contactUrl }: { contactUrl?: string }) {
   useEffect(() => {
     if (!open) return;
     const dialog = menu.current;
+    const toggleButton = toggle.current;
     dialog?.showModal();
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     const media = window.matchMedia("(min-width: 821px)");
     const resize = () => { if (media.matches) setOpen(false); };
     media.addEventListener("change", resize);
-    return () => { dialog?.close(); document.body.style.overflow = previous; toggle.current?.focus(); media.removeEventListener("change", resize); };
+    return () => { dialog?.close(); document.body.style.overflow = previous; toggleButton?.focus(); media.removeEventListener("change", resize); };
   }, [open]);
 
   function navigate(id: string) {
     setOpen(false);
     requestAnimationFrame(() => {
       const section = document.getElementById(id);
+      if (section) { section.tabIndex = -1; section.focus({ preventScroll: true }); }
       section?.scrollIntoView({ behavior: reduce ? "instant" : "smooth" });
       history.replaceState(null, "", `#${id}`);
     });

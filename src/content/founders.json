@@ -1,17 +1,17 @@
 [
   {
+    "role": "founder & creative director",
     "name": "rajni",
-    "role": "",
     "bio": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Runs the room where briefs get interrogated and signs off on nothing safe."
   },
   {
+    "role": "co-founder & graphic designer",
     "name": "bhaskar",
-    "role": "",
     "bio": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Owns the look — type, layout, and every frame that leaves the building."
   },
   {
+    "role": "tech head",
     "name": "yash",
-    "role": "",
     "bio": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Handles the technical side — pipelines, builds, and everything that has to actually run."
   }
 ]
