@@ -8,6 +8,7 @@ out/
 *service-account*.json
 
 docs/compressed_noaudio/
-public/media/
 playwright-report/
 test-results/
+
+docs/qa/
