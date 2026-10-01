@@ -1,5 +1,6 @@
 import copy from "@/content/source.json";
 import founders from "@/content/founders.json";
+import Image from "next/image";
 
 function SectionTop({ label, title, index }: { label: string; title?: string; index: string }) {
   return <div className="section-top"><div><span className="eyebrow">{label}</span>{title && <h2 className="section-heading" data-reveal>{title}</h2>}</div><span className="section-index" aria-hidden="true">{index} / BRVE</span></div>;
@@ -18,12 +19,12 @@ export function Process() {
   </section>;
 }
 
-export function Manifesto() {
+export function Manifesto({ backdrop }: { backdrop?: string }) {
   const b = copy["Manifesto B"];
   return <>
     <section className="section manifesto-opening" id="manifesto"><span className="section-index manifesto-index" aria-hidden="true">02 / BRVE</span><h2 className="big-statement" data-reveal>{copy["Manifesto A"][0]}<span className="red block">{copy["Manifesto A"][1]}</span></h2></section>
     <section className="section manifesto-context" aria-label="Manifesto continued"><div className="manifesto-tags">{b.slice(0, 4).map(t => <span key={t}>{t}</span>)}</div><p className="manifesto-carousel-copy">{b[4]} <span className="red">{b[5]}</span></p><p className="body-copy">{b[6]}</p></section>
-    <section className="section panic"><div className="panic-line" aria-hidden="true" /><h2 className="big-statement" data-reveal>{copy["Manifesto C"][0]}<span className="red block">{copy["Manifesto C"][1]}</span></h2></section>
+    <section className="section panic">{backdrop && <div className="panic-media" aria-hidden="true"><Image src={backdrop} alt="" fill sizes="100vw" /></div>}<div className="panic-line" aria-hidden="true" /><h2 className="big-statement" data-reveal>{copy["Manifesto C"][0]}<span className="red block">{copy["Manifesto C"][1]}</span></h2></section>
     <section className="section services" id="services"><SectionTop label={copy["Manifesto D"][0]} index="03" /><h2 className="sr-only">{copy["Manifesto D"][0]}</h2><ul>{copy["Manifesto D"].slice(1).map((t, i) => <li key={t}><span className="service-number" aria-hidden="true">0{i + 1}</span><span className="display">{t}</span><span className="service-arrow" aria-hidden="true">↗</span></li>)}</ul></section>
     <section className="section ai-statement"><h2 className="section-heading" data-reveal>{copy["Manifesto E"][0]}</h2><ol>{[2, 4, 6].map((n, i) => <li key={n}><span className="eyebrow" aria-hidden="true">0{i + 1}</span><p>{copy["Manifesto E"][n]}</p></li>)}</ol></section>
   </>;
