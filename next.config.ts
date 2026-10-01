@@ -5,6 +5,7 @@ const mediaHosts = (process.env.MEDIA_IMAGE_HOSTS || "blogger.googleusercontent.
 
 const config: NextConfig = {
   poweredByHeader: false,
+  devIndicators: false,
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: mediaHosts.map((hostname) => ({ protocol: "https" as const, hostname })),
