@@ -6,3 +6,8 @@ out/
 !.env.example
 *.tsbuildinfo
 *service-account*.json
+
+docs/compressed_noaudio/
+public/media/
+playwright-report/
+test-results/
