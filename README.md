@@ -74,7 +74,8 @@ been deployed. Do not deploy them until the project is approved for live setup.
 
 1. In Google Cloud, choose the project and enable **Blogger API v3**.
 2. Create an API key restricted to Blogger API v3. The key is used server-side.
-3. Put the numeric `BLOGGER_BLOG_ID` and `BLOGGER_API_KEY` in `.env.local`.
+3. Set `BLOGGER_BLOG_ID=7828446924761889663` for
+   `https://2brveai.blogspot.com/` and add your `BLOGGER_API_KEY` in `.env.local`.
    A public blog needs no OAuth; a private blog would need a separate OAuth flow.
 4. Configure Firebase server access above, then restart the local server.
 5. Sign in at `/admin` and click **Sync Blogger now**.
@@ -95,7 +96,9 @@ marks previously synchronized posts from that source as removed. The public page
 The original feed labels refer to Medium. They are preserved in the local source
 preview. Set approved `journalAllPostsLabel` and `journalReadMoreLabel` in settings
 when connecting Blogger; live posts otherwise use an arrow-only link to avoid a
-mislabelled destination. Real Blogger posts replace the sample titles and excerpts.
+mislabelled destination. The public Blogger feed was checked on 2026-10-02 and
+currently contains no published posts. Once posts are published, real Blogger
+posts replace the sample titles and excerpts after a successful sync.
 
 ## Remaining content
 
