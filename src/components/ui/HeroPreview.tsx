@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 
-export function HeroPreview({ src, mobileSrc, paused }: { src: string; mobileSrc?: string; paused: boolean }) {
+export function HeroPreview({ src, mobileSrc, paused, loop, onEnded }: { src: string; mobileSrc?: string; paused: boolean; loop: boolean; onEnded: () => void }) {
   const ref = useRef<HTMLVideoElement>(null);
   const [ready, setReady] = useState(false);
   useEffect(() => {
@@ -23,5 +23,5 @@ export function HeroPreview({ src, mobileSrc, paused }: { src: string; mobileSrc
     update();
     return () => { observer.disconnect(); document.removeEventListener("visibilitychange", update); motion.removeEventListener("change", update); video.pause(); video.removeAttribute("src"); video.load(); };
   }, [src, mobileSrc, paused]);
-  return <video ref={ref} className={`hero-background-video ${ready ? "ready" : ""}`} muted playsInline loop preload="none" aria-hidden="true" onPlaying={() => setReady(true)} />;
+  return <video ref={ref} className={`hero-background-video ${ready ? "ready" : ""}`} muted playsInline loop={loop} preload="none" aria-hidden="true" onPlaying={() => setReady(true)} onEnded={onEnded} />;
 }
