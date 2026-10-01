@@ -21,6 +21,8 @@ media, YouTube, or Vimeo; the admin area does not upload video files.
 
 ## Status
 
-The account is configured locally. Authentication enforcement and admin UI are
-not implemented yet. Firebase server credentials are still needed when the
-Admin SDK integration begins. No deployed rules or live data were changed.
+The Google sign-in UI and server-side authorization are implemented. Every
+admin read, update, and synchronization request verifies a Firebase bearer token,
+its revocation status, verified email, Google provider, and the configured account.
+Firebase server credentials are still required to exercise the live integration.
+No deployed rules or live data were changed.
