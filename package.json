@@ -4,5 +4,9 @@
   "private": true,
   "dependencies": {
     "firebase": "^12.19.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "typescript": "^7.0.2"
   }
 }
