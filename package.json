@@ -1,0 +1,8 @@
+{
+  "name": "brve-ai",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "firebase": "^12.19.0"
+  }
+}
