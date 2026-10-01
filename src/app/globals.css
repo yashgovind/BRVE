@@ -27,3 +27,17 @@
 @media(max-width:640px){.hero-copy{padding:140px 0 60px;align-items:flex-end}.hero h1{font-size:clamp(42px,11.3vw,68px);max-width:14ch;letter-spacing:-.035em}.hero{min-height:95svh}.hero-response{font-size:24px}.hero-bottom{padding-top:18px}.hero-topline{align-items:center}.film-stage{padding-top:56px}.film-heading{gap:14px}.film-heading .section-index{font-size:9px}.film-heading h2{max-width:13ch;font-size:29px}.film-space{height:65vw;min-height:240px}.film-caption>.display{font-size:24px}.film-play{width:50px;height:50px;right:18px;bottom:18px}.film-dots{gap:3px}.film-dots button{width:22px}.film-dots span{width:18px}.film-pagination{gap:18px}.journal-rail .journal-card{flex-basis:86%}.journal-rail .journal-media{aspect-ratio:3/4}.journal-rail{gap:20px}.journal-rule{margin:0 5px}.journal-navigation{gap:12px}.journal .section-heading{font-size:37px}.journal-copy h3{font-size:27px}.panic{min-height:80svh}.signature{max-width:100%;font-size:clamp(32px,9vw,48px)}}
 @media(prefers-reduced-motion:reduce){.hero-background-video,.background-toggle,.auto-toggle{display:none!important}}
 .big-statement{width:100%;min-width:0}.closing h2{max-width:min(24ch,100%)}.manifesto-opening h2{max-width:min(21ch,100%)}
+
+/* Cinematic player: the film takes the whole viewport, with controls on top. */
+.video-dialog[open]{position:fixed;inset:0;margin:0;width:100vw;height:100vh;height:100dvh;max-width:none;max-height:none;padding:0;border:0;overflow:hidden;background:#050506;color:#fff;display:flex;flex-direction:column;}
+.video-dialog::backdrop{background:#050506;backdrop-filter:none;}
+.video-dialog-top{position:absolute;z-index:4;top:0;left:0;right:0;min-height:92px;margin:0;padding:calc(env(safe-area-inset-top) + 18px) max(var(--gutter),env(safe-area-inset-right)) 20px max(var(--gutter),env(safe-area-inset-left));color:#fff;background:linear-gradient(#050506c9,transparent);pointer-events:none;align-items:center;}
+.video-dialog-top h2{max-width:min(70vw,70ch);font:10px/1.4 var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:#ffffffd9;}
+.video-dialog-top .round-button{pointer-events:auto;border-color:#ffffff75;background:#05050666;color:white;backdrop-filter:blur(10px);}
+.video-dialog-top .round-button:hover{background:var(--color-signal);border-color:var(--color-signal);}
+.video-frame{width:100%;height:100%;min-height:0;flex:1;aspect-ratio:auto;display:grid;place-items:center;background:#050506;}
+.video-frame iframe,.video-frame video{display:block;width:100%;height:100%;max-width:100%;max-height:100%;border:0;object-fit:contain;background:#050506;}
+.video-dialog>p{position:absolute;z-index:3;left:0;right:0;bottom:0;margin:0;padding:54px max(var(--gutter),env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 24px) max(var(--gutter),env(safe-area-inset-left));max-height:24vh;overflow:auto;color:#ffffffe0;background:linear-gradient(transparent,#050506ba);pointer-events:none;}
+@media(prefers-reduced-motion:no-preference){.video-dialog[open]{animation:player-enter .45s cubic-bezier(.22,1,.36,1) both;}.video-dialog[open] .video-frame{animation:film-enter .8s cubic-bezier(.22,1,.36,1) both;}}
+@keyframes player-enter{from{opacity:0}to{opacity:1}}
+@keyframes film-enter{from{opacity:.65;transform:scale(1.025)}to{opacity:1;transform:scale(1)}}
