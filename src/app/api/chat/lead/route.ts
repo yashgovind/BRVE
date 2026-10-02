@@ -1,5 +1,5 @@
 import { validateChatLead } from "@/lib/chatbot";
-import { isGoogleAppsScriptUrl } from "@/lib/google-form-bridge";
+import { resolveGoogleAppsScriptUrl } from "@/lib/google-form-bridge";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -19,12 +19,9 @@ export async function POST(request: Request) {
   const result = validateChatLead(body);
   if (!result.success) return jsonError(result.error, 400);
 
-  const bridgeUrl = process.env.GOOGLE_FORM_BRIDGE_URL;
+  const bridgeUrl = resolveGoogleAppsScriptUrl(process.env.GOOGLE_FORM_BRIDGE_URL);
   const secret = process.env.GOOGLE_FORM_BRIDGE_SECRET;
   if (!bridgeUrl || !secret) return jsonError("The Google Form handoff is not connected yet. Please use the Google Form link on the page.", 503);
-  if (!isGoogleAppsScriptUrl(bridgeUrl)) {
-    return jsonError("The Google Form handoff is misconfigured. Please contact BRVE directly.", 503);
-  }
 
   try {
     const response = await fetch(bridgeUrl, {

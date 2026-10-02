@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { answerCommonQuestion, validateChatLead } from "../src/lib/chatbot";
-import { isGoogleAppsScriptUrl } from "../src/lib/google-form-bridge";
+import { DEFAULT_GOOGLE_FORM_BRIDGE_URL, isGoogleAppsScriptUrl, resolveGoogleAppsScriptUrl } from "../src/lib/google-form-bridge";
 
 function errorOf(value: unknown) {
   const result = validateChatLead(value);
@@ -38,4 +38,10 @@ test("Google Form bridge only accepts deployed HTTPS Apps Script endpoints", () 
   assert.equal(isGoogleAppsScriptUrl("https://script.google.com.evil.example/macros/s/id/exec"), false);
   assert.equal(isGoogleAppsScriptUrl("https://example.com/macros/s/id/exec"), false);
   assert.equal(isGoogleAppsScriptUrl("https://script.google.com/"), false);
+});
+
+test("Google Form bridge falls back to the verified deployment URL for missing or malformed config", () => {
+  assert.equal(resolveGoogleAppsScriptUrl(undefined), DEFAULT_GOOGLE_FORM_BRIDGE_URL);
+  assert.equal(resolveGoogleAppsScriptUrl("deployment-id-only"), DEFAULT_GOOGLE_FORM_BRIDGE_URL);
+  assert.equal(resolveGoogleAppsScriptUrl("https://script.google.com/macros/s/custom/exec"), "https://script.google.com/macros/s/custom/exec");
 });
