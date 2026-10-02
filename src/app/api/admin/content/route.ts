@@ -5,8 +5,7 @@ function errorResponse(error: unknown) {
   const message = typeof error === "object" && error !== null && "message" in error && typeof error.message === "string" ? error.message : "The operation could not be completed. Please try again.";
   if (status >= 500) console.error("BRVE admin API failed", error instanceof Error ? error.name : "UnknownError");
   const safeMessage = status < 500 || (error instanceof Error && error.name === "HttpError") ? message : "The operation could not be completed. Please try again.";
-  const diagnostic = error instanceof Error ? `${error.name}:${error.message.replace(/[\r\n]/g, " ").slice(0, 120)}` : "UnknownError";
-  return Response.json({ error: safeMessage, ...(status >= 500 ? { diagnostic } : {}) }, { status });
+  return Response.json({ error: safeMessage }, { status });
 }
 
 export async function GET(request: Request) {
@@ -27,10 +26,9 @@ export async function PUT(request: Request) {
   try {
     const { requireAdmin, readJson, HttpError } = await import("@/lib/firebase/auth");
     await requireAdmin(request);
-    const [{ revalidateTag }, { adminDb, adminFirestoreValues }, { canUseImage, settingsSchema, videoSchema }] = await Promise.all([
-      import("next/cache"), import("@/lib/firebase/admin"), import("@/lib/validation"),
+    const [{ revalidateTag }, { FieldValue, Timestamp }, { adminDb }, { canUseImage, settingsSchema, videoSchema }] = await Promise.all([
+      import("next/cache"), import("firebase-admin/firestore"), import("@/lib/firebase/admin"), import("@/lib/validation"),
     ]);
-    const { FieldValue, Timestamp } = adminFirestoreValues;
     const body = await readJson(request);
     if (body?.kind === "video") {
       const result = videoSchema.safeParse(body.data);
