@@ -5,8 +5,7 @@ function errorResponse(error: unknown) {
   const message = typeof error === "object" && error !== null && "message" in error && typeof error.message === "string" ? error.message : "The operation could not be completed. Please try again.";
   if (status >= 500) console.error("BRVE admin API failed", error instanceof Error ? error.name : "UnknownError");
   const safeMessage = status < 500 || (error instanceof Error && error.name === "HttpError") ? message : "The operation could not be completed. Please try again.";
-  const diagnostic = error instanceof Error ? `${error.name}:${error.message.replace(/[\r\n]/g, " ").slice(0, 160)}` : "UnknownError";
-  return Response.json({ error: safeMessage, ...(status >= 500 ? { diagnostic } : {}) }, { status });
+  return Response.json({ error: safeMessage }, { status });
 }
 
 export async function GET(request: Request) {
