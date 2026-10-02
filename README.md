@@ -57,6 +57,17 @@ verified email, Google provider, and the exact admin allowlist. No login cookie 
 used: every API request carries an Authorization bearer token, so ambient-cookie
 CSRF does not apply. Anonymous requests and other users cannot write.
 
+The public `/sign-in` page supports Google, email/password, and phone/SMS sign-in.
+Enable Google, Email/Password, and Phone in Firebase Authentication → Sign-in
+method. Set an SMS region policy for phone sign-in and authorize the deployed
+domain. Firebase does not support phone authentication from `localhost`; the local
+page explains this and keeps SMS sending disabled there. Public sign-in creates an
+identity only; Firestore writes remain restricted to the server-side admin flow.
+The `/` route redirects signed-out visitors to `/sign-in`; successful sign-in
+returns them to the one-page site, and signing out returns them to sign-in. This
+client-side route gate is for navigation only, not a security boundary for public
+marketing copy or media. Search crawlers will not normally reach the gated page.
+
 After configuring the service account and creating Firestore, seed the seven
 selected videos (creates missing records only):
 
@@ -64,11 +75,12 @@ selected videos (creates missing records only):
 node --env-file=.env.local --import tsx scripts/seed-videos.ts
 ```
 
-Configure `siteSettings/general.contactFormUrl` in the admin UI. Its CTA remains
-disabled until a valid URL exists; the approved email link continues to work.
-Firebase Storage is intentionally not used. Metadata points to external providers
-or static `/media/` files. The current public queries use Firestore's automatic
-single-field indexes, so composite indexes are not required.
+Configure the **Google Form URL** in the admin UI. It is stored as
+`siteSettings/general.contactFormUrl`; the CTA remains disabled until a valid URL
+exists, and the approved email link continues to work. Video uploads and generated
+posters use Firebase Storage; deploy the included `storage.rules` before enabling
+uploads. The current public queries use Firestore's automatic single-field indexes,
+so composite indexes are not required.
 
 ## Blogger API and synchronization
 
@@ -93,16 +105,16 @@ Source removals are marked `sourceRemoved` after successful upserts, never delet
 The removal pass is scoped to the configured source blog. Malformed API responses abort synchronization. A valid empty Blogger post list
 marks previously synchronized posts from that source as removed. The public page never calls Blogger directly.
 
-The original feed labels refer to Medium. They are preserved in the local source
-preview. Set approved `journalAllPostsLabel` and `journalReadMoreLabel` in settings
-when connecting Blogger; live posts otherwise use an arrow-only link to avoid a
-mislabelled destination. The public Blogger feed was checked on 2026-10-02 and
-currently contains no published posts. Once posts are published, real Blogger
-posts replace the sample titles and excerpts after a successful sync.
+The Journal links to `https://2brveai.blogspot.com/` by default and reads only
+published Blogger posts synchronized into Firestore. The feed was checked on
+2026-10-02 and currently contains no published posts, so the page shows an empty
+state instead of source sample articles. Once posts are published, run a Blogger
+sync to display their real titles, excerpts, dates, and cover images.
 
 ## Remaining content
 
-- Founder portraits and approved biographies (the source includes Lorem ipsum).
+- Approved founder biographies (the source includes Lorem ipsum); current founder
+  portraits are clearly stylized AI avatar concepts, not likeness references.
 - Blogger URL/blog ID and API key; Firebase server credentials.
 - Real contact form URL.
 - Approved human-readable titles for the unnamed video files, if desired; original
