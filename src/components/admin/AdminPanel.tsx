@@ -57,7 +57,7 @@ function makeId(title: string) {
   return `${slug}-${crypto.randomUUID().slice(0, 8)}`;
 }
 
-export function AdminPanel({ backendReady }: { backendReady: boolean }) {
+export function AdminPanel() {
   const [user, setUser] = useState<User | null>(null);
   const [authorized, setAuthorized] = useState(false);
   const [videos, setVideos] = useState<Video[]>([]);
@@ -176,7 +176,6 @@ export function AdminPanel({ backendReady }: { backendReady: boolean }) {
   return <main className="admin-shell">
     <header className="admin-header"><Link href="/" aria-label="BRVE homepage"><Logo /></Link><Link href="/" className="eyebrow">← Website preview</Link></header>
     <div className="admin-intro"><span className="eyebrow">Private administration</span><h1>BRVE control room.</h1><p>Manage video links, site settings, and Blogger synchronization.</p></div>
-    {!backendReady && <div className="admin-notice"><strong>Server connection pending.</strong><p>Google sign-in is configured. To verify admin access and save to Firestore, configure a Firebase service account on the server. No live edits are enabled until then.</p></div>}
     <div className="admin-auth">{user ? <><span>{user.email}</span><button className="admin-button secondary" onClick={() => void signOut(getAuth(getFirebaseClientApp()))}>Sign out</button></> : <button className="admin-button" disabled={!authReady || busy} onClick={login}>{authReady ? "Sign in with Google" : "Loading sign-in…"}</button>}</div>
     {status && <p role="status" className="admin-status">{status}{busy && progress > 0 && <span className="upload-progress-text"> {progress}%</span>}</p>}
     {authorized && <div className="admin-grid">
