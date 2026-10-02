@@ -1,17 +1,21 @@
 export const runtime = "nodejs";
 
-function errorResponse(error: unknown) {
+function errorResponse(error: unknown, stage: string) {
   const status = typeof error === "object" && error !== null && "status" in error && typeof error.status === "number" ? error.status : 500;
   const message = typeof error === "object" && error !== null && "message" in error && typeof error.message === "string" ? error.message : "The operation could not be completed. Please try again.";
   if (status >= 500) console.error("BRVE admin API failed", error instanceof Error ? error.name : "UnknownError");
   const safeMessage = status < 500 || (error instanceof Error && error.name === "HttpError") ? message : "The operation could not be completed. Please try again.";
-  return Response.json({ error: safeMessage }, { status });
+  const code = typeof error === "object" && error !== null && "code" in error && typeof error.code === "string" ? error.code : error instanceof Error ? error.name : "UnknownError";
+  return Response.json({ error: safeMessage, ...(status >= 500 ? { diagnostic: `${stage}:${code}` } : {}) }, { status });
 }
 
 export async function GET(request: Request) {
+  let stage = "loading-authorization";
   try {
     const { requireAdmin } = await import("@/lib/firebase/auth");
+    stage = "checking-admin-token";
     await requireAdmin(request);
+    stage = "loading-admin-data";
     const [{ adminDb }, { settingsSchema }, { publicVideo }] = await Promise.all([
       import("@/lib/firebase/admin"), import("@/lib/validation"), import("@/lib/firebase/data"),
     ]);
@@ -20,12 +24,15 @@ export async function GET(request: Request) {
     const raw = settings.data() || {};
     const general = Object.fromEntries(Object.keys(settingsSchema.shape).filter(k => k in raw).map(k => [k, raw[k]]));
     return Response.json({ videos: videos.docs.map(d => publicVideo(d.id, d.data())).filter(Boolean), settings: general }, { headers: { "Cache-Control": "no-store" } });
-  } catch (error) { return errorResponse(error); }
+  } catch (error) { return errorResponse(error, stage); }
 }
 export async function PUT(request: Request) {
+  let stage = "loading-authorization";
   try {
     const { requireAdmin, readJson, HttpError } = await import("@/lib/firebase/auth");
+    stage = "checking-admin-token";
     await requireAdmin(request);
+    stage = "loading-admin-data";
     const [{ revalidateTag }, { FieldValue, Timestamp }, { adminDb }, { canUseImage, settingsSchema, videoSchema }] = await Promise.all([
       import("next/cache"), import("firebase-admin/firestore"), import("@/lib/firebase/admin"), import("@/lib/validation"),
     ]);
@@ -49,5 +56,5 @@ export async function PUT(request: Request) {
       revalidateTag("siteSettings", { expire: 0 });
     } else throw new HttpError(400, "Choose video or settings.");
     return Response.json({ ok: true });
-  } catch (error) { return errorResponse(error); }
+  } catch (error) { return errorResponse(error, stage); }
 }
