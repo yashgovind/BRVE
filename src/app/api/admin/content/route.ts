@@ -26,9 +26,10 @@ export async function PUT(request: Request) {
   try {
     const { requireAdmin, readJson, HttpError } = await import("@/lib/firebase/auth");
     await requireAdmin(request);
-    const [{ revalidateTag }, { FieldValue, Timestamp }, { adminDb }, { canUseImage, settingsSchema, videoSchema }] = await Promise.all([
-      import("next/cache"), import("firebase-admin/firestore"), import("@/lib/firebase/admin"), import("@/lib/validation"),
+    const [{ revalidateTag }, { adminDb, adminFirestoreValues }, { canUseImage, settingsSchema, videoSchema }] = await Promise.all([
+      import("next/cache"), import("@/lib/firebase/admin"), import("@/lib/validation"),
     ]);
+    const { FieldValue, Timestamp } = adminFirestoreValues;
     const body = await readJson(request);
     if (body?.kind === "video") {
       const result = videoSchema.safeParse(body.data);
