@@ -19,12 +19,12 @@ export function Process() {
   </section>;
 }
 
-export function Manifesto({ backdrop }: { backdrop?: string }) {
+export function Manifesto() {
   const b = copy["Manifesto B"];
   return <>
     <section className="section manifesto-opening" id="manifesto"><span className="section-index manifesto-index" aria-hidden="true">02 / BRVE</span><h2 className="big-statement" data-reveal>{copy["Manifesto A"][0]}<span className="red block">{copy["Manifesto A"][1]}</span></h2></section>
     <section className="section manifesto-context" aria-label="Manifesto continued"><div className="manifesto-tags">{b.slice(0, 4).map(t => <span key={t}>{t}</span>)}</div><p className="manifesto-carousel-copy">{b[4]} <span className="red">{b[5]}</span></p><p className="body-copy">{b[6]}</p></section>
-    <section className="section panic">{backdrop && <div className="panic-media" aria-hidden="true"><Image src={backdrop} alt="" fill sizes="100vw" /></div>}<div className="panic-line" aria-hidden="true" /><h2 className="big-statement" data-reveal>{copy["Manifesto C"][0]}<span className="red block">{copy["Manifesto C"][1]}</span></h2></section>
+    <section className="section panic"><div className="panic-media" aria-hidden="true" /><div className="panic-line" aria-hidden="true" /><h2 className="big-statement" data-reveal>{copy["Manifesto C"][0]}<span className="red block">{copy["Manifesto C"][1]}</span></h2></section>
     <section className="section services" id="services"><SectionTop label={copy["Manifesto D"][0]} index="03" /><h2 className="sr-only">{copy["Manifesto D"][0]}</h2><ul>{copy["Manifesto D"].slice(1).map((t, i) => <li key={t}><span className="service-number" aria-hidden="true">0{i + 1}</span><span className="display">{t}</span><span className="service-arrow" aria-hidden="true">↗</span></li>)}</ul></section>
     <section className="section ai-statement"><h2 className="section-heading" data-reveal>{copy["Manifesto E"][0]}</h2><ol>{[2, 4, 6].map((n, i) => <li key={n}><span className="eyebrow" aria-hidden="true">0{i + 1}</span><p>{copy["Manifesto E"][n]}</p></li>)}</ol></section>
   </>;
@@ -48,8 +48,9 @@ export function PointOfView() {
 }
 
 export function Founders() {
+  const portraits = ["/founders/rajni.webp", "/founders/yash.webp", "/founders/yash-new.webp"];
   return <section className="section founders" id="founders"><SectionTop label={copy.Founders[0]} title={copy.Founders[1]} index="05" /><p className="body-copy founders-intro">{copy.Founders[2]}</p><div className="founders-grid">{founders.map((f, i) => <article className="founder" key={f.name}>
-    <div className={`portrait-placeholder portrait-${i}`} role="img" aria-label={`${f.name} — portrait not supplied`}><span className="portrait-initial display" aria-hidden="true">{f.name[0]}</span><span className="preview-label">Portrait to be supplied</span><span className="eyebrow founder-role">{f.role}</span></div>
-    <div className="founder-copy"><h3>{f.name}</h3><span className="preview-label">Source biography · contains placeholder copy</span><p>{f.bio}</p></div>
+    <div className={`portrait-placeholder portrait-${i}`}><Image src={portraits[i]} alt={`${f.name}, ${f.role}`} fill sizes="(max-width: 640px) 90vw, (max-width: 900px) 45vw, 30vw" /><span className="eyebrow founder-role">{f.role}</span></div>
+    <div className="founder-copy"><h3>{f.name}</h3><p>{f.bio}</p></div>
   </article>)}</div></section>;
 }
