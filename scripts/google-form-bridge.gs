@@ -7,7 +7,6 @@
  * Run createBrveForm() once to create a form and save all form/item IDs automatically.
  */
 function doPost(event) {
-function doPost(event) {
   try {
     var payload = JSON.parse(event.postData.contents || "{}");
     var properties = PropertiesService.getScriptProperties();
