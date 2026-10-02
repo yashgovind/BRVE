@@ -2,6 +2,9 @@
   "name": "brve-ai",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=22"
+  },
   "dependencies": {
     "@react-three/fiber": "^9.8.1",
     "cheerio": "^1.2.0",

@@ -7,6 +7,7 @@ if (!mediaHosts.includes("firebasestorage.googleapis.com")) mediaHosts.push("fir
 const config: NextConfig = {
   poweredByHeader: false,
   devIndicators: false,
+  serverExternalPackages: ["firebase-admin"],
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: mediaHosts.map((hostname) => ({ protocol: "https" as const, hostname })),
