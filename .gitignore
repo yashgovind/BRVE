@@ -6,6 +6,7 @@ out/
 !.env.example
 *.tsbuildinfo
 *service-account*.json
+*firebase-adminsdk*.json
 
 docs/compressed_noaudio/
 playwright-report/
