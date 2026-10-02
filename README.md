@@ -1,158 +1,285 @@
-# BRVE.AI — local review build
+# BRVE.AI
 
-Native Next.js App Router / React / TypeScript / Tailwind site reconstructed from
-the supplied Claude design. Approved source copy is in `src/content`; Claude's
-viewer and runtime are not included. No deployment has been performed.
+A cinematic creative-agency website built with Next.js, Firebase, and Google Blogger. The site brings together campaign films, services, the team, journal posts, and a Google Form contact flow.
 
-## Run locally
+**Domain:** [brveai.com](https://brveai.com) · **Journal:** [2brveai.blogspot.com](https://2brveai.blogspot.com/) · **Repository:** [yashgovind/BRVE](https://github.com/yashgovind/BRVE)
 
-```sh
+## Start here
+
+- **Run the website on your computer:** follow [Local setup](#local-setup).
+- **Upload videos or change the Google Form:** see [Managing content](#managing-content).
+- **Publish the website:** follow [Deploy to Vercel](#deploy-to-vercel).
+- **Something is not working:** check [Troubleshooting](#troubleshooting).
+
+## What the website includes
+
+- One-page agency experience with responsive layouts and section navigation.
+- A muted video hero that advances when a clip finishes and loops through the playlist.
+- A film gallery with fullscreen playback, desktop 3D effects, and simpler mobile and reduced-motion alternatives.
+- Google, email/password, and phone sign-in.
+- An admin area for videos, Blogger synchronization, and site settings.
+- A horizontal journal carousel populated from Google Blogger through Firestore.
+- A configurable Google Form CTA and support links that open Gmail compose.
+
+Visitors who are signed out are routed to `/sign-in`. The main website is at `/`; management is at `/admin`. The sign-in gate controls navigation, but it does not make the marketing content or media private. It also affects how search engines can access the homepage.
+
+## How the pieces fit together
+
+| Tool | What it does |
+| --- | --- |
+| Next.js, React, TypeScript | Build the pages and server endpoints |
+| Tailwind CSS and custom CSS | Control layout, colors, typography, and responsive styling |
+| Motion and GSAP ScrollTrigger | Animate navigation, text, and scrolling |
+| React Three Fiber / Three.js | Provide the enhanced desktop film gallery |
+| Firebase Authentication | Sign users in |
+| Firestore | Store video records, journal posts, and site settings |
+| Firebase Storage | Store videos and thumbnails uploaded through admin |
+| Google Blogger | Remain the source of truth for journal articles |
+| Vercel | Build and host the website |
+
+Fonts and the supplied optimized campaign media are included in `public/`. The site is a native Next.js application; it does not embed the Claude Design viewer.
+
+## Local setup
+
+### 1. Install the tools
+
+Install **Node.js 22.x**, which includes npm, and **Git**. You also need access to the Firebase project to use sign-in and live content.
+
+Check your installation in a terminal:
+
+```bash
+node --version
+npm --version
+git --version
+```
+
+### 2. Download the project
+
+```bash
+git clone https://github.com/yashgovind/BRVE.git
+cd BRVE
 npm ci
+```
+
+`npm ci` installs the dependency versions recorded in the lockfile.
+
+### 3. Create your local configuration
+
+Copy the example file **only if you do not already have `.env.local`**:
+
+```bash
+cp .env.example .env.local
+```
+
+On Windows PowerShell, use `Copy-Item .env.example .env.local` instead.
+
+Open `.env.local` in a text editor and fill in the values described below. The leading dot makes the file hidden in some file managers. In Dolphin, press **Alt + .** to show hidden files.
+
+`.env.local` is excluded from Git. Keep it and Firebase service-account JSON files off GitHub. The tracked `.env.example` contains the variable names, not credentials.
+
+### 4. Start the website
+
+```bash
 npm run dev
 ```
 
-Open http://localhost:3000. Private management UI: http://localhost:3000/admin.
-The original logo and seven selected supplied films are used. Source media is
-kept unchanged in `docs/compressed_noaudio`; optimized copies are in `public/media`.
-`python3 scripts/prepare-media.py` regenerates them with FFmpeg.
+Open **http://localhost:3000**. Sign in to access the homepage. Use **Ctrl+C** in the terminal to stop the server. Restart it after changing `.env.local`.
 
-`LOCAL_CONTENT_PREVIEW=true` enables the supplied local video manifest and source
-sample feed. This flag is for local review, not a live content substitute. The
-React components do not contain a hardcoded video list. When Firestore is ready,
-the server reads `videos`, `blogPosts`, and `siteSettings/general` and caches each
-independently. Without the preview flag, missing videos are hidden and missing
-data degrades gracefully. Preview mode is always disabled on Vercel production.
+## Firebase configuration
 
-## Design and motion
+Use the same Firebase project for the web app configuration, server credentials, database, and storage bucket.
 
-- Original expanded Archivo, Inter, JetBrains Mono, and Caveat fonts are self-hosted.
-- Full-screen film hero; seven approved headline/response pairs are retained.
-- GSAP ScrollTrigger drives camera movement through a real React Three Fiber film
-  gallery, image clipping, parallax, and the typographic interlude.
-- WebGL is imported only near the gallery on desktop with motion enabled. It uses
-  demand rendering. Mobile, reduced-motion, and WebGL failure use the DOM gallery.
-- The feed uses a large, image-led horizontal editorial rail, inspired by the
-  media galleries on https://white-desert.com/. No reference assets or copy are used.
-- Only the active muted preview loads. Full films load on click. Background
-  playback pauses off-screen, in hidden tabs, in the player, or using its control.
-- Mobile and reduced-motion users retain all content and direct controls.
+### Web app values
 
-## Firebase setup still required for live management
+In [Firebase Console](https://console.firebase.google.com/), open **Project settings → General → Your apps**. Register a web app if needed and copy its configuration into these variables:
 
-The supplied web app configuration is already in ignored `.env.local`. Google
-sign-in must have `localhost` under Authentication → Settings → Authorized domains
-for local testing. Only the server-configured `ADMIN_EMAIL` can manage content;
-it is currently `2brveai@gmail.com`.
+| Firebase value | Environment variable |
+| --- | --- |
+| `apiKey` | `NEXT_PUBLIC_FIREBASE_API_KEY` |
+| `authDomain` | `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` |
+| `projectId` | `NEXT_PUBLIC_FIREBASE_PROJECT_ID` |
+| `storageBucket` | `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET` |
+| `messagingSenderId` | `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID` |
+| `appId` | `NEXT_PUBLIC_FIREBASE_APP_ID` |
 
-Firebase Console → Project settings → Service accounts → Firebase Admin SDK:
-generate a service-account key and keep the downloaded JSON **outside this repo**.
-Set `GOOGLE_APPLICATION_CREDENTIALS=/absolute/path/to/key.json` in `.env.local`.
-Alternatively, set `FIREBASE_ADMIN_PROJECT_ID`, `FIREBASE_ADMIN_CLIENT_EMAIL`, and
-`FIREBASE_ADMIN_PRIVATE_KEY` (escaped `\n` is supported). Never prefix server keys
-with `NEXT_PUBLIC_`, paste private keys into chat, or commit them.
+`NEXT_PUBLIC_` values are available to the browser. Never use this prefix for service-account credentials or the Blogger API key. `NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID` is optional; this application does not currently initialize Analytics.
 
-Use a service identity with the Firestore read/write and Firebase Auth user-read
-permissions needed by these handlers. The handlers verify ID tokens and revocation,
-verified email, Google provider, and the exact admin allowlist. No login cookie is
-used: every API request carries an Authorization bearer token, so ambient-cookie
-CSRF does not apply. Anonymous requests and other users cannot write.
+### Server credentials
 
-The public `/sign-in` page supports Google, email/password, and phone/SMS sign-in.
-Enable Google, Email/Password, and Phone in Firebase Authentication → Sign-in
-method. Set an SMS region policy for phone sign-in and authorize the deployed
-domain. Firebase does not support phone authentication from `localhost`; the local
-page explains this and keeps SMS sending disabled there. Public sign-in creates an
-identity only; Firestore writes remain restricted to the server-side admin flow.
-The `/` route redirects signed-out visitors to `/sign-in`; successful sign-in
-returns them to the one-page site, and signing out returns them to sign-in. This
-client-side route gate is for navigation only, not a security boundary for public
-marketing copy or media. Search crawlers will not normally reach the gated page.
+The server uses the Firebase Admin SDK to read content and perform authorized updates.
 
-After configuring the service account and creating Firestore, seed the seven
-selected videos (creates missing records only):
+1. Open **Project settings → Service accounts → Firebase Admin SDK**.
+2. Generate a private key and keep the downloaded JSON outside this repository.
+3. Copy these fields into `.env.local` or Vercel's environment settings:
 
-```sh
+| Field in the JSON file | Environment variable |
+| --- | --- |
+| `project_id` | `FIREBASE_ADMIN_PROJECT_ID` |
+| `client_email` | `FIREBASE_ADMIN_CLIENT_EMAIL` |
+| `private_key` | `FIREBASE_ADMIN_PRIVATE_KEY` |
+
+Keep the complete private key, including its BEGIN/END lines. The application accepts escaped `\n` line breaks. In a `.env` file, quote the value; when entering it directly in Vercel, paste the key value without the surrounding JSON quotes.
+
+For local development, you can alternatively set `GOOGLE_APPLICATION_CREDENTIALS` to the absolute path of the downloaded JSON file.
+
+**Do not set `GOOGLE_APPLICATION_CREDENTIALS` on Vercel.** A path on your computer does not exist there, and this variable takes priority over the three credential fields above.
+
+### Sign-in and authorized domains
+
+In **Authentication → Sign-in method**, enable **Google**, **Email/Password**, and **Phone** for the methods you want to offer. Configure the allowed SMS regions for phone sign-in.
+
+In **Authentication → Settings → Authorized domains**, add the hostnames you use:
+
+- `localhost` for local Google sign-in.
+- Your actual Vercel hostname, such as `your-project.vercel.app`.
+- `brveai.com` and `www.brveai.com` for the production domain.
+
+Use hostnames without `https://` or paths. Test phone sign-in on an authorized hosted domain; this application's local sign-in page disables SMS requests on localhost. See the [Firebase Google sign-in guide](https://firebase.google.com/docs/auth/web/google-signin) for provider configuration.
+
+Set `ADMIN_EMAIL` to the Google account allowed to manage the site. Admin API access requires a verified Google sign-in matching this setting. Ordinary signed-in users do not receive admin access.
+
+### Database and upload rules
+
+Create a Firestore database and initialize Firebase Storage if you want file uploads. The app uses:
+
+| Collection / document | Contents |
+| --- | --- |
+| `videos` | Titles, media URLs, thumbnails, ordering, and visibility |
+| `blogPosts` | Normalized articles synchronized from Blogger |
+| `siteSettings/general` | Google Form URL and social links |
+
+Install the Firebase CLI, sign in, and deploy the repository's rules to **your intended project**:
+
+```bash
+npm install -g firebase-tools
+firebase login
+firebase deploy --only firestore:rules,firestore:indexes,storage --project YOUR_FIREBASE_PROJECT_ID
+```
+
+Replace `YOUR_FIREBASE_PROJECT_ID` before running the command. If Storage is not initialized, deploy just `firestore:rules,firestore:indexes` first.
+
+The current `storage.rules` explicitly allows uploads for `2brveai@gmail.com`. If the administrator changes, update that rule as well as `ADMIN_EMAIL`, then deploy the rules again. Do not replace the rules with unrestricted public writes.
+
+## Managing content
+
+Sign in with the admin Google account and open `/admin`, or use the **Admin** navigation link when available.
+
+### Add a video
+
+1. Choose a video file in the upload card.
+2. Enter its title and complete the available fields.
+3. Save it, then check it on the homepage.
+
+The upload interface rejects videos longer than **2 minutes** and generates a thumbnail. The duration check runs in the browser; it is not a server-side media inspection. Firebase Storage must be configured and its rules deployed for uploads to work.
+
+To add the seven supplied films to a new database, run this once after configuring server credentials:
+
+```bash
 node --env-file=.env.local --import tsx scripts/seed-videos.ts
 ```
 
-Configure the **Google Form URL** in the admin UI. It is stored as
-`siteSettings/general.contactFormUrl`; the CTA remains disabled until a valid URL
-exists, and the approved email link continues to work. Video uploads and generated
-posters use Firebase Storage; deploy the included `storage.rules` before enabling
-uploads. The current public queries use Firestore's automatic single-field indexes,
-so composite indexes are not required.
+This creates missing video records only. It does not overwrite existing records or upload files; the supplied films are already in `public/media/`.
 
-## Blogger API and synchronization
+### Set the contact form
 
-1. In Google Cloud, choose the project and enable **Blogger API v3**.
-2. Create an API key restricted to Blogger API v3. The key is used server-side.
-3. Set `BLOGGER_BLOG_ID=7828446924761889663` for
-   `https://2brveai.blogspot.com/` and add your `BLOGGER_API_KEY` in `.env.local`.
-   A public blog needs no OAuth; a private blog would need a separate OAuth flow.
-4. Configure Firebase server access above, then restart the local server.
-5. Sign in at `/admin` and click **Sync Blogger now**.
+In admin site settings, paste the public Google Form responder link into **Google Form URL** and save. The existing contact CTA uses this setting. It is stored as `siteSettings/general.contactFormUrl`.
 
-`POST /api/sync/blogger` accepts a verified admin bearer token or a strong
-`SYNC_SECRET` bearer token (minimum 32 characters). Protected GET supports a future
-scheduler; no cron or scheduled write is installed. Never send credentials in URL
-parameters. Manual sync is adequate for occasional posting; a daily cron can be
-added later if the publishing frequency warrants it.
+### Publish journal posts
 
-The sync fetches all pages before writing, rejects invalid posts, strips HTML from
-excerpts, retains only normalized fields, preserves `featured`, `order`, and
-editorial `active`, and records timestamps. A lease prevents overlapping syncs.
-Source removals are marked `sourceRemoved` after successful upserts, never deleted.
-The removal pass is scoped to the configured source blog. Malformed API responses abort synchronization. A valid empty Blogger post list
-marks previously synchronized posts from that source as removed. The public page never calls Blogger directly.
+Write and publish articles in [Blogger](https://www.blogger.com/), then click **Sync Blogger now** in admin. The website displays up to four eligible synchronized posts and links readers to the original Blogger articles.
 
-The Journal links to `https://2brveai.blogspot.com/` by default and reads only
-published Blogger posts synchronized into Firestore. The feed was checked on
-2026-10-02 and currently contains no published posts, so the page shows an empty
-state instead of source sample articles. Once posts are published, run a Blogger
-sync to display their real titles, excerpts, dates, and cover images.
+## Connect Google Blogger
 
-## Remaining content
+1. In [Google Cloud Console](https://console.cloud.google.com/), enable **Blogger API v3**.
+2. Create an API key and restrict its API access to Blogger API v3. This project calls Blogger from the server, so browser-referrer restrictions are not appropriate.
+3. Add `BLOGGER_API_KEY` and `BLOGGER_BLOG_ID` to the environment.
+4. Restart locally, or redeploy on Vercel, then run **Sync Blogger now**.
 
-- Approved founder biographies (the source includes Lorem ipsum); current founder
-  portraits are clearly stylized AI avatar concepts, not likeness references.
-- Blogger URL/blog ID and API key; Firebase server credentials.
-- Real contact form URL.
-- Approved human-readable titles for the unnamed video files, if desired; original
-  filenames are preserved rather than inventing campaign names.
+The BRVE blog is `https://2brveai.blogspot.com/`; its configured blog ID is `7828446924761889663`. Public Blogger content can be read using an API key; private-blog OAuth is not implemented. [Blogger API documentation](https://developers.google.com/blogger/docs/3.0/using).
 
-## Checks
-
-```sh
-npm run typecheck
-npm run lint
-npm test
-npm run test:e2e  # local server must be running
-npm run build
+```text
+Blogger → protected server sync → Firestore → homepage journal
 ```
 
-Auth allowlisting, unsafe URLs, Blogger normalization/editorial preservation, exact
-source copy, lazy playback, dialog focus, mobile navigation, gallery controls, and
-unauthenticated API rejection are tested. Live Google/Firestore/Blogger success
-paths still require the actual server credentials and source blog.
+Sync updates articles while preserving editorial settings. Articles removed from the source are hidden from the public feed rather than deleted from Firestore. An empty blog produces an empty journal state.
 
-The lockfile pins supported TypeScript 5.9 tooling. Overrides update transitive
-gRPC to 1.14.5 and gaxios's UUID to 11.1.1 to resolve audit findings without
-downgrading Firebase. `npm audit` was clean after those updates.
+Manual sync is sufficient for occasional publishing. No cron job is configured. For a future external scheduler, `/api/sync/blogger` accepts a bearer `SYNC_SECRET` of at least 32 characters. This secret is optional when using the authenticated admin sync button.
 
-## Release boundary
+## Deploy to Vercel
 
-Canonical domain: https://brveai.com. No DNS, Vercel, or production configuration
-was changed. Do not deploy until the local design is approved, source placeholders
-are resolved, integrations are verified, and preview mode is disabled.
+1. Sign in to [Vercel](https://vercel.com/) and import `yashgovind/BRVE` from GitHub.
+2. Use the **Next.js** preset and the repository root as the root directory. Keep the default build and output settings.
+3. Add environment variables before deploying. You can import `.env.local` through the environment-variable import control.
+4. **Remove `GOOGLE_APPLICATION_CREDENTIALS`** from the imported variables. Use the three `FIREBASE_ADMIN_*` fields instead.
+5. Set **`LOCAL_CONTENT_PREVIEW=false`** and include the Firebase web values, server credentials, `ADMIN_EMAIL`, and Blogger values.
+6. Deploy, add the resulting hostname to Firebase's authorized domains, and test sign-in, videos, admin uploads, the contact form, and Blogger sync.
 
-## Local validation — 2026-10-02
+Select Production and any Preview environments that need these values. Redeploy after changing environment variables; existing deployments do not receive changes automatically. See [Vercel environment variables](https://vercel.com/docs/environment-variables) and [Git deployment](https://vercel.com/docs/git).
 
-Production build, ESLint, TypeScript, and six data/security tests passed.
-Playwright against the production server passed nine desktop/mobile tests; the
-mobile-menu case was intentionally skipped on desktop. Headless Chrome initial
-loads at 390px and 1440px had no horizontal overflow, one preview-video request,
-no initial WebGL canvas, approximately 230 KB encoded script resources, and CLS
-of 0 / 0.000081 respectively. These are local lab observations, not field Core
-Web Vitals or a Lighthouse score. The full desktop WebGL gallery was separately
-rendered and visually inspected. Live authenticated integrations remain untested
-until credentials and the Blogger source are supplied.
+Once Git integration is connected, pushes to the configured production branch—normally `main`—can trigger deployments automatically.
+
+### Connect the domain
+
+In Vercel's project domain settings, add `brveai.com` and `www.brveai.com`. Use **`brveai.com` as canonical** and redirect `www` to it.
+
+At your domain provider, enter the exact DNS records Vercel shows for this project. Do not guess the record values. Verify the domain and HTTPS in Vercel, then confirm both hostnames are authorized in Firebase Authentication.
+
+## Everyday development
+
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Start the local development server |
+| `npm run typecheck` | Check TypeScript types |
+| `npm run lint` | Check code quality |
+| `npm test` | Run unit tests for validation, authorization, and Blogger data handling |
+| `npm run build` | Create a production build |
+| `npm start` | Run the production build locally; run `build` first |
+| `npm run test:e2e` | Run browser tests against a running local server |
+
+For browser tests, install Chromium first with `npx playwright install chromium`. Tests that interact with the homepage may need updates or authenticated test state to account for the current sign-in gate; do not treat old browser-test results as validation of the latest login flow.
+
+### Where to edit things
+
+```text
+src/
+  app/                  Pages, metadata, global CSS, and API endpoints
+  components/
+    admin/              Video uploads and site settings
+    auth/               Sign-in methods and homepage gate
+    layout/             Navigation
+    sections/           Homepage sections
+    motion/             Scroll and reveal animations
+    three/              Desktop film gallery enhancement
+    ui/                 Reusable controls and media players
+  content/              Static copy, founder details, local video manifest
+  lib/
+    firebase/           Firebase initialization, data access, authorization
+    blogger/            Blogger fetching, normalization, synchronization
+  types/                Shared TypeScript types
+public/                 Fonts, branding, avatars, optimized media
+scripts/                Media preparation and initial video records
+tests/                  Unit and browser tests
+```
+
+Keep approved website copy unchanged unless a content edit is explicitly requested. Some founder biographies still contain source placeholder text and need editorial approval. Founder portraits are stylized AI-generated avatars.
+
+`LOCAL_CONTENT_PREVIEW=true` is an optional local video fallback when Firestore has no videos. It does not bypass sign-in or generate sample journal posts, and it is disabled in Vercel production.
+
+## Troubleshooting
+
+| Problem | What to check |
+| --- | --- |
+| `.env.local` is missing from the folder view | Enable hidden files. It sits beside `package.json`, not inside `src/`. |
+| Firebase says the domain is unauthorized | Add the exact hostname in Authentication → Settings → Authorized domains. |
+| Admin link or access is missing | Use Google sign-in with the verified account matching `ADMIN_EMAIL`. |
+| The deployed site has no live videos or settings | Check all three Firebase Admin variables, remove `GOOGLE_APPLICATION_CREDENTIALS` on Vercel, and review server logs. |
+| Uploaded videos are rejected | Check the 2-minute limit, Storage setup, and deployed admin upload rules. |
+| Journal is empty | Publish public Blogger posts, verify the API key/blog ID, and run the admin sync. |
+| Contact CTA is disabled | Save a valid Google Form responder URL in admin site settings. |
+| Environment changes have no effect | Restart the local server or redeploy on Vercel. |
+| Hydration warning mentions `data-darkreader` | Disable Dark Reader for the site and reload to check whether the extension is modifying the page. |
+| Support opens Gmail but mail is not delivered | The link opens compose only; `support@brveai.com` needs a separately configured mailbox. |
+
+## License
+
+See [LICENSE](LICENSE).
