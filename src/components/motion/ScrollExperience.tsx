@@ -16,15 +16,10 @@ export function ScrollExperience() {
         gsap.fromTo(".film-heading h2", { y: 54, opacity: .2, clipPath: "inset(0 0 38% 0)" }, { y: 0, opacity: 1, clipPath: "inset(0 0 0% 0)", ease: "none", scrollTrigger: { trigger: ".film-gallery", start: "top 76%", end: "top 32%", scrub: .8 } });
         gsap.fromTo(".film-space", { scale: .94, clipPath: "inset(9% 8% 9% 8%)" }, { scale: 1, clipPath: "inset(0% 0% 0% 0%)", ease: "none", scrollTrigger: { trigger: ".film-gallery", start: "top 68%", end: "top 14%", scrub: 1 } });
         gsap.fromTo(".film-caption", { y: 35, opacity: .35 }, { y: 0, opacity: 1, ease: "none", scrollTrigger: { trigger: ".film-gallery", start: "top 52%", end: "top top", scrub: .8 } });
-        gsap.utils.toArray<HTMLElement>(".journal-card").forEach(card => {
-          gsap.fromTo(card, { y: 42, opacity: .55 }, { y: 0, opacity: 1, ease: "none", scrollTrigger: { trigger: card, start: "top 88%", end: "top 56%", scrub: .7 } });
-          const image = card.querySelector("img");
-          if (image) gsap.fromTo(image, { scale: 1.1 }, { scale: 1, ease: "none", scrollTrigger: { trigger: card, start: "top 88%", end: "top 46%", scrub: .8 } });
-        });
         gsap.utils.toArray<HTMLElement>(".founder").forEach((card, i) => gsap.fromTo(card, { y: 38 + i * 5, opacity: .45 }, { y: 0, opacity: 1, ease: "none", scrollTrigger: { trigger: card, start: "top 90%", end: "top 62%", scrub: .7 } }));
         gsap.fromTo(".panic-media", { scale: 1.35, clipPath: "inset(15% 18% 15% 18%)" }, { scale: 1, clipPath: "inset(0% 0% 0% 0%)", ease: "none", scrollTrigger: { trigger: ".panic", start: "top 90%", end: "center center", scrub: 1 } });
         gsap.fromTo(".panic h2", { y: 80 }, { y: -35, ease: "none", scrollTrigger: { trigger: ".panic", start: "top bottom", end: "bottom top", scrub: 1 } });
-        gsap.fromTo(".word-beat>.display", { xPercent: 12, rotateY: -20 }, { xPercent: -12, rotateY: 20, ease: "none", scrollTrigger: { trigger: ".word-beat", start: "top bottom", end: "bottom top", scrub: .8 } });
+        gsap.fromTo(".word-beat>.display", { scale: .96, opacity: .55 }, { scale: 1, opacity: 1, ease: "none", scrollTrigger: { trigger: ".word-beat", start: "top 78%", end: "center center", scrub: .6 } });
         gsap.fromTo(".word-strike", { scaleX: 0 }, { scaleX: 1, transformOrigin: "left", ease: "power2.out", scrollTrigger: { trigger: ".word-beat", start: "top 70%", end: "center center", scrub: .5 } });
         gsap.utils.toArray<HTMLElement>(".services li").forEach((row, i) => {
           gsap.fromTo(row.querySelector(".display"), { x: i % 2 ? 80 : -35, opacity: .25 }, { x: 0, opacity: 1, ease: "none", scrollTrigger: { trigger: row, start: "top 95%", end: "top 65%", scrub: .4 } });
