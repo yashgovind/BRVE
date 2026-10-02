@@ -10,6 +10,9 @@ export function HeroPreview({ src, mobileSrc, paused, loop, onEnded }: { src: st
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
     if (motion.matches || connection?.saveData) return;
+    video.muted = true;
+    video.defaultMuted = true;
+    video.volume = 0;
     video.src = window.matchMedia("(max-width: 640px)").matches && mobileSrc ? mobileSrc : src;
     let visible = true;
     const update = () => {
