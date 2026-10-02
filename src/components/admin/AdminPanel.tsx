@@ -77,14 +77,20 @@ export function AdminPanel() {
     const current = getAuth(getFirebaseClientApp()).currentUser;
     if (!current) throw new Error("Sign in first.");
     const response = await fetch(path, { ...options, headers: { "Content-Type": "application/json", Authorization: `Bearer ${await current.getIdToken()}` }, cache: "no-store" });
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error || "Request failed.");
+    const responseText = await response.text();
+    let data: { error?: string; videos?: Video[]; settings?: SiteSettings; synced?: number; removed?: number } = {};
+    if (responseText) {
+      try { data = JSON.parse(responseText) as typeof data; }
+      catch { throw new Error(`The server returned an unreadable response (HTTP ${response.status}). Please check the deployment logs.`); }
+    }
+    if (!response.ok) throw new Error(data.error || `The server could not complete this request (HTTP ${response.status}).`);
+    if (!responseText) throw new Error(`The server returned an empty response (HTTP ${response.status}).`);
     return data;
   }, []);
 
   const load = useCallback(async () => {
     const data = await api("/api/admin/content");
-    setVideos(data.videos); setSettings(data.settings); setAuthorized(true);
+    setVideos(data.videos || []); setSettings(data.settings || {}); setAuthorized(true);
   }, [api]);
 
   useEffect(() => {
@@ -168,7 +174,7 @@ export function AdminPanel() {
 
   async function sync() {
     setBusy(true); setStatus("Synchronizing Blogger…");
-    try { const result = await api("/api/sync/blogger", { method: "POST" }); setStatus(`Synced ${result.synced} posts. ${result.removed} removed posts hidden.`); }
+    try { const result = await api("/api/sync/blogger", { method: "POST" }); setStatus(`Synced ${result.synced ?? 0} posts. ${result.removed ?? 0} removed posts hidden.`); }
     catch (error) { setStatus((error as Error).message); }
     finally { setBusy(false); }
   }
