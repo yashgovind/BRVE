@@ -48,7 +48,7 @@ export function ContactLink({ url, outline = false }: { url?: string; outline?: 
         <a className="contact-form-fallback" href={url} target="_blank" rel="noopener noreferrer">Open form in a new tab ↗</a>
       </> : <div className="contact-form-missing">
         <p>The Google Form link has not been added to site settings yet.</p>
-        <a href="mailto:support@brveai.com">support@brveai.com ↗</a>
+        <a href="https://mail.google.com/mail/?view=cm&fs=1&to=support%40brveai.com" target="_blank" rel="noopener noreferrer">support@brveai.com ↗</a>
       </div>}
     </dialog>}
   </>;
