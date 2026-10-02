@@ -4,15 +4,17 @@ function errorResponse(error: unknown) {
   const status = typeof error === "object" && error !== null && "status" in error && typeof error.status === "number" ? error.status : 500;
   const message = typeof error === "object" && error !== null && "message" in error && typeof error.message === "string" ? error.message : "The operation could not be completed. Please try again.";
   if (status >= 500) console.error("BRVE admin API failed", error instanceof Error ? error.name : "UnknownError");
-  return Response.json({ error: status < 500 ? message : "The operation could not be completed. Please try again." }, { status });
+  const safeMessage = status < 500 || (error instanceof Error && error.name === "HttpError") ? message : "The operation could not be completed. Please try again.";
+  return Response.json({ error: safeMessage }, { status });
 }
 
 export async function GET(request: Request) {
   try {
-    const [{ requireAdmin }, { adminDb }, { settingsSchema }, { publicVideo }] = await Promise.all([
-      import("@/lib/firebase/auth"), import("@/lib/firebase/admin"), import("@/lib/validation"), import("@/lib/firebase/data"),
-    ]);
+    const { requireAdmin } = await import("@/lib/firebase/auth");
     await requireAdmin(request);
+    const [{ adminDb }, { settingsSchema }, { publicVideo }] = await Promise.all([
+      import("@/lib/firebase/admin"), import("@/lib/validation"), import("@/lib/firebase/data"),
+    ]);
     const db = adminDb();
     const [videos, settings] = await Promise.all([db.collection("videos").orderBy("order").limit(100).get(), db.collection("siteSettings").doc("general").get()]);
     const raw = settings.data() || {};
@@ -22,10 +24,11 @@ export async function GET(request: Request) {
 }
 export async function PUT(request: Request) {
   try {
-    const [{ revalidateTag }, { FieldValue, Timestamp }, { adminDb }, { requireAdmin, readJson, HttpError }, { canUseImage, settingsSchema, videoSchema }] = await Promise.all([
-      import("next/cache"), import("firebase-admin/firestore"), import("@/lib/firebase/admin"), import("@/lib/firebase/auth"), import("@/lib/validation"),
-    ]);
+    const { requireAdmin, readJson, HttpError } = await import("@/lib/firebase/auth");
     await requireAdmin(request);
+    const [{ revalidateTag }, { FieldValue, Timestamp }, { adminDb }, { canUseImage, settingsSchema, videoSchema }] = await Promise.all([
+      import("next/cache"), import("firebase-admin/firestore"), import("@/lib/firebase/admin"), import("@/lib/validation"),
+    ]);
     const body = await readJson(request);
     if (body?.kind === "video") {
       const result = videoSchema.safeParse(body.data);
