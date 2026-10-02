@@ -60,11 +60,32 @@ test("film and journal controls are usable without WebGL", async ({ page }) => {
   await expect(page.locator("canvas")).toHaveCount(0);
 });
 
+test("chatbot answers a BRVE question and validates a contact brief", async ({ page, request }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Open BRVE chat" }).click();
+  await page.getByRole("button", { name: "What does BRVE do?" }).click();
+  await expect(page.getByText("Brand. Creative. Content. Advertising. AI that earns its place.")).toBeVisible();
+  await page.getByLabel("Ask a question").fill("I want to discuss a brief");
+  await page.getByRole("button", { name: "Send question" }).click();
+  await expect(page.getByLabel("What are you working on?")).toBeVisible();
+  const invalidLead = await request.post("/api/chat/lead", { data: { name: "S", email: "bad", phone: "123", brief: "hi" } });
+  expect(invalidLead.status()).toBe(400);
+  expect((await invalidLead.json()).error).toMatch(/name/i);
+  const spamTrap = await request.post("/api/chat/lead", { data: { website: "filled by a bot" } });
+  expect(spamTrap.status()).toBe(200);
+  expect((await spamTrap.json()).ok).toBe(true);
+});
+
 test("admin and sync reject unauthenticated writes", async ({ request, page }) => {
-  expect((await request.get("/api/admin/content")).status()).toBe(401);
+  const adminRead = await request.get("/api/admin/content");
+  expect(adminRead.status()).toBe(401);
+  expect((await adminRead.json()).error).toMatch(/sign in/i);
   expect((await request.put("/api/admin/content", { data: { kind: "settings", data: { contactFormUrl: "https://evil.example" } } })).status()).toBe(401);
-  expect((await request.post("/api/sync/blogger")).status()).toBe(401);
-  expect((await request.get("/api/sync/blogger")).status()).toBe(401);
+  const syncPost = await request.post("/api/sync/blogger");
+  const syncGet = await request.get("/api/sync/blogger");
+  expect(syncPost.status()).toBe(401);
+  expect(syncGet.status()).toBe(401);
+  expect((await syncPost.json()).error).toMatch(/sign in/i);
   await page.goto("/admin");
   await expect(page.getByRole("button", { name: "Sign in with Google" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Save settings" })).toHaveCount(0);

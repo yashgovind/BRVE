@@ -184,6 +184,27 @@ This creates missing video records only. It does not overwrite existing records 
 
 In admin site settings, paste the public Google Form responder link into **Google Form URL** and save. The existing contact CTA uses this setting. It is stored as `siteSettings/general.contactFormUrl`.
 
+The homepage chatbot answers common questions and collects a name, email, phone number, and short brief. To create the Google Form and connect real submissions:
+
+1. Open [Google Apps Script](https://script.google.com/) while signed in to the BRVE Google account and create a project.
+2. Paste `scripts/google-form-bridge.gs` into the editor.
+3. In **Project Settings → Script Properties**, add `BRVE_FORM_BRIDGE_SECRET` with a long random value.
+4. Run `createBrveForm()` once and approve the requested Google Forms permission. It creates the form questions and saves their IDs automatically. Copy the responder URL from the execution log and put it in admin **Google Form URL**.
+5. Deploy the script as a **Web app**, executing as your account and allowing access to anyone. The endpoint checks the shared secret before it can write a response.
+6. Set `GOOGLE_FORM_BRIDGE_URL` to the deployed `/exec` URL and `GOOGLE_FORM_BRIDGE_SECRET` to the same value from Script Properties in local and Vercel environments.
+
+Each successful chatbot submission then becomes an actual Google Form response through the Apps Script `FormApp` service. If the bridge is not configured, the chatbot still answers questions and directs visitors to the regular Google Form.
+
+```text
+BRVE_FORM_BRIDGE_SECRET
+BRVE_FORM_ID                 # created and saved by createBrveForm()
+BRVE_NAME_ITEM_ID            # created and saved automatically
+BRVE_EMAIL_ITEM_ID           # created and saved automatically
+BRVE_PHONE_ITEM_ID            # created and saved automatically
+BRVE_BRIEF_ITEM_ID           # created and saved automatically
+```
+Keep the bridge secret only in Script Properties and server environment variables; do not add it to browser code.
+
 ### Publish journal posts
 
 Write and publish articles in [Blogger](https://www.blogger.com/), then click **Sync Blogger now** in admin. The website displays up to four eligible synchronized posts and links readers to the original Blogger articles.
