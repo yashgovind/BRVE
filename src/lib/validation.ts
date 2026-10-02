@@ -35,14 +35,16 @@ export const videoSchema = z.object({
 export const settingsSchema = z.object({
   contactFormUrl: optionalUrl, instagramUrl: optionalUrl, linkedinUrl: optionalUrl,
   youtubeUrl: optionalUrl, journalUrl: optionalUrl,
-  journalAllPostsLabel: z.string().trim().max(100).optional(),
-  journalReadMoreLabel: z.string().trim().max(100).optional(),
 }).strict();
 
 export function canUseImage(url?: string) {
   if (!url) return false;
   if (/^\/media\/[a-z0-9-]+\.(webp|jpg|png)$/.test(url)) return true;
   if (!isPublicHttpsUrl(url)) return false;
+  const storageBucket = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
+  if (storageBucket && new URL(url).hostname === "firebasestorage.googleapis.com") {
+    return new URL(url).pathname.startsWith(`/v0/b/${storageBucket}/o/`);
+  }
   const hosts = (process.env.MEDIA_IMAGE_HOSTS || "blogger.googleusercontent.com,images.unsplash.com,i.ytimg.com,i.vimeocdn.com").split(",").map(h => h.trim());
   return hosts.includes(new URL(url).hostname);
 }

@@ -23,6 +23,11 @@ export async function PUT(request: Request) {
     if (body?.kind === "video") {
       const result = videoSchema.safeParse(body.data);
       if (!result.success) throw new HttpError(400, result.error.issues.map(i => `${i.path.join(".")}: ${i.message}`).join("; "));
+      if (result.data.provider === "hosted" && result.data.duration) {
+        const match = result.data.duration.match(/^PT(?:(\d+(?:\.\d+)?)H)?(?:(\d+(?:\.\d+)?)M)?(?:(\d+(?:\.\d+)?)S)?$/i);
+        const seconds = match ? Number(match[1] || 0) * 3600 + Number(match[2] || 0) * 60 + Number(match[3] || 0) : Number.NaN;
+        if (!Number.isFinite(seconds) || seconds <= 0 || seconds > 120) throw new HttpError(400, "Hosted videos must be 2 minutes or shorter.");
+      }
       if (!canUseImage(result.data.thumbnail)) throw new HttpError(400, "Add the thumbnail host to MEDIA_IMAGE_HOSTS before saving this image URL.");
       const { id, publishedAt, ...video } = result.data;
       await adminDb().collection("videos").doc(id).set({ ...video, ...(publishedAt ? { publishedAt: Timestamp.fromDate(new Date(publishedAt)) } : {}), updatedAt: FieldValue.serverTimestamp() });

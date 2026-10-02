@@ -38,6 +38,4 @@ export type SiteSettings = {
     linkedinUrl?: string;
     youtubeUrl?: string;
     journalUrl?: string;
-    journalAllPostsLabel?: string;
-    journalReadMoreLabel?: string;
 };

@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const mediaHosts = (process.env.MEDIA_IMAGE_HOSTS || "blogger.googleusercontent.com,images.unsplash.com,i.ytimg.com,i.vimeocdn.com")
   .split(",").map((host) => host.trim()).filter(Boolean);
+if (!mediaHosts.includes("firebasestorage.googleapis.com")) mediaHosts.push("firebasestorage.googleapis.com");
 
 const config: NextConfig = {
   poweredByHeader: false,
