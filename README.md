@@ -184,7 +184,9 @@ This creates missing video records only. It does not overwrite existing records 
 
 In admin site settings, paste the public Google Form responder link into **Google Form URL** and save. The existing contact CTA uses this setting. It is stored as `siteSettings/general.contactFormUrl`.
 
-The homepage chatbot answers common questions and collects a name, email, phone number, and short brief. To create the Google Form and connect real submissions:
+The homepage chatbot sends questions to Mistral's Ministral 3B chat model from a server-side route. Add `MISTRAL_API_KEY` to `.env.local` for local development and to Vercel for production; the key is never sent to the browser. `MISTRAL_MODEL` is optional and defaults to `ministral-3b-latest`. If the key is not configured or the API is unavailable, the chatbot uses its built-in BRVE answers.
+
+The chatbot also collects a name, email, phone number, and short brief. The simplest Google Form setup is to use the existing contact form link, which opens the published form directly. Automatic submission of chatbot details into Google Forms additionally requires the Apps Script bridge below:
 
 1. Open [Google Apps Script](https://script.google.com/) while signed in to the BRVE Google account and create a project.
 2. Paste `scripts/google-form-bridge.gs` into the editor.
@@ -230,7 +232,7 @@ Manual sync is sufficient for occasional publishing. No cron job is configured. 
 
 1. Sign in to [Vercel](https://vercel.com/) and import `yashgovind/BRVE` from GitHub.
 2. Use the **Next.js** preset and the repository root as the root directory. Keep the default build and output settings.
-3. Add environment variables before deploying. You can import `.env.local` through the environment-variable import control.
+3. Add environment variables before deploying. You can import `.env.local` through the environment-variable import control. Add `MISTRAL_API_KEY` to Production to enable Mistral-powered chat.
 4. **Remove `GOOGLE_APPLICATION_CREDENTIALS`** from the imported variables. Use the three `FIREBASE_ADMIN_*` fields instead.
 5. Set **`LOCAL_CONTENT_PREVIEW=false`** and include the Firebase web values, server credentials, `ADMIN_EMAIL`, and Blogger values.
 6. Deploy, add the resulting hostname to Firebase's authorized domains, and test sign-in, videos, admin uploads, the contact form, and Blogger sync.

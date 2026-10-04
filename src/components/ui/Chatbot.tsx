@@ -12,14 +12,37 @@ export function Chatbot({ formUrl }: { formUrl?: string }) {
   const [question, setQuestion] = useState("");
   const [contacting, setContacting] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [asking, setAsking] = useState(false);
+  const [chatStatus, setChatStatus] = useState("");
   const [notice, setNotice] = useState("");
 
-  function ask(value: string) {
+  async function ask(value: string) {
     const text = value.trim();
-    if (!text) return;
-    setMessages(current => [...current, { from: "you", text }, { from: "brve", text: answerCommonQuestion(text) }]);
+    if (!text || asking) return;
+    const history = [...messages.slice(-10).map(message => ({ role: message.from === "brve" ? "assistant" as const : "user" as const, content: message.text })), { role: "user" as const, content: text }];
+    setMessages(current => [...current, { from: "you", text }]);
     setQuestion("");
     if (/contact|brief|talk|quote|cost|price/i.test(text)) setContacting(true);
+    setAsking(true);
+    setChatStatus("");
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: history }),
+      });
+      const result = await response.json().catch(() => ({})) as { reply?: string; provider?: "mistral" | "fallback"; reason?: "unconfigured" | "unavailable"; error?: string };
+      if (!response.ok || !result.reply) throw new Error(result.error || "Chat is temporarily unavailable.");
+      setMessages(current => [...current, { from: "brve", text: result.reply! }]);
+      if (result.provider === "fallback") {
+        setChatStatus(result.reason === "unconfigured" ? "Mistral isn’t configured for this deployment yet; using BRVE quick replies." : "Mistral is temporarily unavailable; using BRVE quick replies.");
+      }
+    } catch {
+      setMessages(current => [...current, { from: "brve", text: answerCommonQuestion(text) }]);
+      setChatStatus("Mistral is temporarily unavailable; using BRVE quick replies.");
+    } finally {
+      setAsking(false);
+    }
   }
 
   async function submitLead(event: FormEvent<HTMLFormElement>) {
@@ -50,10 +73,11 @@ export function Chatbot({ formUrl }: { formUrl?: string }) {
   return <div className="chatbot-root">
     {open && <section className="chatbot-panel" aria-label="BRVE chat">
       <header className="chatbot-header"><div><span className="eyebrow">BRVE.AI</span><h2>Ask us anything.</h2></div><button type="button" className="round-button" onClick={() => setOpen(false)} aria-label="Close chat">×</button></header>
-      <div className="chatbot-scroll" aria-live="polite">{messages.map((message, i) => <p key={i} className={`chat-message ${message.from}`}>{message.text}</p>)}
-        {!contacting && <div className="chatbot-prompts" aria-label="Common questions">{commonQuestions.map(item => <button type="button" key={item} onClick={() => ask(item)}>{item}</button>)}</div>}
+      <div className="chatbot-scroll" aria-live="polite">{messages.map((message, i) => <p key={i} className={`chat-message ${message.from}`}>{message.text}</p>)}{asking && <p className="chat-message brve" role="status">thinking…</p>}
+        {!contacting && <div className="chatbot-prompts" aria-label="Common questions">{commonQuestions.map(item => <button type="button" key={item} disabled={asking} onClick={() => void ask(item)}>{item}</button>)}</div>}
       </div>
-      <form className="chatbot-ask" onSubmit={event => { event.preventDefault(); ask(question); }}><label className="sr-only" htmlFor="chatbot-question">Ask a question</label><input id="chatbot-question" value={question} onChange={event => setQuestion(event.target.value)} placeholder="Type a question…" maxLength={300} /><button type="submit" aria-label="Send question">↗</button></form>
+      <form className="chatbot-ask" onSubmit={event => { event.preventDefault(); void ask(question); }}><label className="sr-only" htmlFor="chatbot-question">Ask a question</label><input id="chatbot-question" value={question} onChange={event => setQuestion(event.target.value)} placeholder="Type a question…" maxLength={1200} disabled={asking} /><button type="submit" aria-label="Send question" disabled={asking || !question.trim()}>↗</button></form>
+      {chatStatus && <p className="chatbot-notice" role="status">{chatStatus}</p>}
       {contacting && <form className="chatbot-lead" onSubmit={submitLead}>
         <p className="eyebrow">Leave a brief</p>
         <label>Name<input name="name" autoComplete="name" maxLength={100} required /></label>

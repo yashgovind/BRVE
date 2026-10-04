@@ -61,10 +61,17 @@ test("film and journal controls are usable without WebGL", async ({ page }) => {
 });
 
 test("chatbot answers a BRVE question and validates a contact brief", async ({ page, request }) => {
+  const chatRequests: unknown[] = [];
+  await page.route("**/api/chat", async route => {
+    chatRequests.push(route.request().postDataJSON());
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ reply: "Brand. Creative. Content. Advertising. AI that earns its place.", provider: "mistral" }) });
+  });
   await page.goto("/");
   await page.getByRole("button", { name: "Open BRVE chat" }).click();
   await page.getByRole("button", { name: "What does BRVE do?" }).click();
   await expect(page.getByText("Brand. Creative. Content. Advertising. AI that earns its place.")).toBeVisible();
+  expect(chatRequests).toHaveLength(1);
+  expect(chatRequests[0]).toMatchObject({ messages: [{ role: "assistant" }, { role: "user", content: "What does BRVE do?" }] });
   await page.getByLabel("Ask a question").fill("I want to discuss a brief");
   await page.getByRole("button", { name: "Send question" }).click();
   await expect(page.getByLabel("What are you working on?")).toBeVisible();
