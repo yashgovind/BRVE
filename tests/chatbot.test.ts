@@ -1,14 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { answerCommonQuestion, validateChatLead } from "../src/lib/chatbot";
+import { answerCommonQuestion } from "../src/lib/chatbot";
 import { parseAssistantTurns } from "../src/lib/chat-assistant";
-import { DEFAULT_GOOGLE_FORM_BRIDGE_URL, isGoogleAppsScriptUrl, resolveGoogleAppsScriptUrl } from "../src/lib/google-form-bridge";
-
-function errorOf(value: unknown) {
-  const result = validateChatLead(value);
-  assert.equal(result.success, false);
-  return result.success ? "" : result.error;
-}
 
 test("chatbot gives BRVE-specific answers for common questions", () => {
   assert.match(answerCommonQuestion("What services do you offer?"), /^Brand\. Creative\. Content\./);
@@ -30,33 +23,4 @@ test("Mistral conversation accepts bounded user and assistant turns only", () =>
   assert.equal(parseAssistantTurns({ messages: [{ role: "user", content: "x".repeat(1201) }] }).success, false);
   assert.equal(parseAssistantTurns({ messages: Array(13).fill({ role: "user", content: "hi" }) }).success, false);
   assert.equal(parseAssistantTurns({ messages: [{ role: "assistant", content: "No user turn" }] }).success, false);
-});
-
-test("chat lead accepts normalized contact details and a brief", () => {
-  assert.deepEqual(validateChatLead({ name: "  Sam Lee ", email: " SAM@EXAMPLE.COM ", phone: "+1 (415) 555-2671", brief: "We need a campaign idea." }), {
-    success: true,
-    data: { name: "Sam Lee", email: "SAM@EXAMPLE.COM", phone: "+14155552671", brief: "We need a campaign idea." },
-  });
-});
-
-test("chat lead rejects missing, malformed, oversized, or non-object values", () => {
-  assert.equal(validateChatLead(null).success, false);
-  assert.match(errorOf({ name: "S", email: "sam", phone: "555", brief: "hi" }), /name/i);
-  assert.match(errorOf({ name: "Sam", email: "sam@example.com", phone: "555", brief: "Need a campaign" }), /phone/i);
-  assert.match(errorOf({ name: "Sam", email: "sam@example.com", phone: "+14155552671", brief: "no" }), /brief/i);
-  assert.equal(validateChatLead({ name: "Sam", email: "sam@example.com", phone: "+14155552671", brief: "x".repeat(2001) }).success, false);
-});
-
-test("Google Form bridge only accepts deployed HTTPS Apps Script endpoints", () => {
-  assert.equal(isGoogleAppsScriptUrl("https://script.google.com/macros/s/AKfycbxExample/exec"), true);
-  assert.equal(isGoogleAppsScriptUrl("http://script.google.com/macros/s/id/exec"), false);
-  assert.equal(isGoogleAppsScriptUrl("https://script.google.com.evil.example/macros/s/id/exec"), false);
-  assert.equal(isGoogleAppsScriptUrl("https://example.com/macros/s/id/exec"), false);
-  assert.equal(isGoogleAppsScriptUrl("https://script.google.com/"), false);
-});
-
-test("Google Form bridge falls back to the verified deployment URL for missing or malformed config", () => {
-  assert.equal(resolveGoogleAppsScriptUrl(undefined), DEFAULT_GOOGLE_FORM_BRIDGE_URL);
-  assert.equal(resolveGoogleAppsScriptUrl("deployment-id-only"), DEFAULT_GOOGLE_FORM_BRIDGE_URL);
-  assert.equal(resolveGoogleAppsScriptUrl("https://script.google.com/macros/s/custom/exec"), "https://script.google.com/macros/s/custom/exec");
 });

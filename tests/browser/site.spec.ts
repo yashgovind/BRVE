@@ -60,7 +60,7 @@ test("film and journal controls are usable without WebGL", async ({ page }) => {
   await expect(page.locator("canvas")).toHaveCount(0);
 });
 
-test("chatbot answers a BRVE question and validates a contact brief", async ({ page, request }) => {
+test("chatbot answers a BRVE question and links contact requests to the Google Form", async ({ page }) => {
   const chatRequests: unknown[] = [];
   await page.route("**/api/chat", async route => {
     chatRequests.push(route.request().postDataJSON());
@@ -74,13 +74,9 @@ test("chatbot answers a BRVE question and validates a contact brief", async ({ p
   expect(chatRequests[0]).toMatchObject({ messages: [{ role: "assistant" }, { role: "user", content: "What does BRVE do?" }] });
   await page.getByLabel("Ask a question").fill("I want to discuss a brief");
   await page.getByRole("button", { name: "Send question" }).click();
-  await expect(page.getByLabel("What are you working on?")).toBeVisible();
-  const invalidLead = await request.post("/api/chat/lead", { data: { name: "S", email: "bad", phone: "123", brief: "hi" } });
-  expect(invalidLead.status()).toBe(400);
-  expect((await invalidLead.json()).error).toMatch(/name/i);
-  const spamTrap = await request.post("/api/chat/lead", { data: { website: "filled by a bot" } });
-  expect(spamTrap.status()).toBe(200);
-  expect((await spamTrap.json()).ok).toBe(true);
+  const formLink = page.getByRole("link", { name: "bring the brief →" });
+  await expect(formLink).toBeVisible();
+  await expect(formLink).toHaveAttribute("href", /docs\.google\.com\/forms|#contact/);
 });
 
 test("admin and sync reject unauthenticated writes", async ({ request, page }) => {
